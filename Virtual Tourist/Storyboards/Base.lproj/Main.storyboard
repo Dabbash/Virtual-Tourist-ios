@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="vyQ-Zd-6HE">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Travel Locations Map View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="TravelLocationsMapViewController" customModule="Virtual_Tourist" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="7Qg-xZ-G1i">
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                            </mapView>
+                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="HnI-Bm-FGk">
+                                <rect key="frame" x="131" y="757" width="153" height="61"/>
+                                <color key="backgroundColor" name="AccentColor"/>
+                                <state key="normal" title="Button"/>
+                                <connections>
+                                    <segue destination="WEI-qN-29z" kind="show" id="DZR-Ng-SIP"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="HnI-Bm-FGk" secondAttribute="trailing" constant="130" id="6Yk-pi-0RZ"/>
+                            <constraint firstItem="7Qg-xZ-G1i" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="NLl-tz-PvR"/>
+                            <constraint firstItem="7Qg-xZ-G1i" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="WgE-Px-OPp"/>
+                            <constraint firstAttribute="bottom" secondItem="7Qg-xZ-G1i" secondAttribute="bottom" id="ayF-vB-yD3"/>
+                            <constraint firstItem="7Qg-xZ-G1i" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="eAX-PJ-l3r"/>
+                            <constraint firstItem="HnI-Bm-FGk" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="131" id="g5N-Oz-RH1"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="HnI-Bm-FGk" secondAttribute="bottom" constant="75" id="xho-sW-xsd"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="naz-jv-d8c"/>
+                    <connections>
+                        <outlet property="mapView" destination="7Qg-xZ-G1i" id="Zem-Dx-GWK"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-259.4202898550725" y="89.732142857142847"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="Il1-kd-0Mk">
+            <objects>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="ioI-gA-5P0" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+                <navigationController id="vyQ-Zd-6HE" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="CMS-Jp-lyG">
+                        <rect key="frame" x="0.0" y="44" width="414" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="BYZ-38-t0r" kind="relationship" relationship="rootViewController" id="92F-bJ-xLU"/>
+                    </connections>
+                </navigationController>
+            </objects>
+            <point key="canvasLocation" x="-1172" y="90"/>
+        </scene>
+        <!--Photo Album View Controller-->
+        <scene sceneID="a0G-Dr-K0q">
+            <objects>
+                <viewController id="WEI-qN-29z" customClass="PhotoAlbumViewController" customModule="Virtual_Tourist" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="MPI-1T-o8F">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3VV-3O-Nys">
+                                <rect key="frame" x="0.0" y="852" width="414" height="44"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                <items>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="uMI-Zq-SPt"/>
+                                    <barButtonItem title="New Collection" width="143.5" id="5dm-gO-rOZ"/>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="7Fm-6W-7qx"/>
+                                </items>
+                            </toolbar>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="4vf-2x-nMa"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="NTn-s5-eNX"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="3nB-ze-sNN" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="707" y="90"/>
+        </scene>
+    </scenes>
+    <resources>
+        <namedColor name="AccentColor">
+            <color red="0.0" green="0.46000000000000002" blue="0.89000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

@@ -11,8 +11,24 @@ import CoreData
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-
-
+    func currentCoordinateWhenLaunch() {
+        if(UserDefaults.standard.bool(forKey: "hasLaunchedBefore")) {
+            print("App has launched before")
+        } else {
+            print("This is first launch")
+            UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
+            UserDefaults.standard.set(0.0, forKey: "userLatitude")
+            UserDefaults.standard.set(0.0, forKey: "userLogitude")
+            UserDefaults.standard.set(200, forKey: "userLatitudeDelta")
+            UserDefaults.standard.set(200, forKey: "userLongitudeDelta")
+            UserDefaults.standard.synchronize()
+        }
+    }
+    
+    func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        currentCoordinateWhenLaunch()
+        return true
+    }
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         return true
