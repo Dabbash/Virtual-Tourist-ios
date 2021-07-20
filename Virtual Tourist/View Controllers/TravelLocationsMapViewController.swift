@@ -46,6 +46,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
 
         fetchUserDefaultsDetailsForMap()
         
+        // ??????? after adding this method and some lines in createNewAnnotation method to save the pins
         setUpFetchedResultController()
         
         let uilpgr = UILongPressGestureRecognizer(target: self, action: #selector(createNewAnnotation))
