@@ -19,8 +19,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             UserDefaults.standard.set(true, forKey: "hasLaunchedBefore")
             UserDefaults.standard.set(0.0, forKey: "userLatitude")
             UserDefaults.standard.set(0.0, forKey: "userLogitude")
-            UserDefaults.standard.set(200, forKey: "userLatitudeDelta")
-            UserDefaults.standard.set(200, forKey: "userLongitudeDelta")
+            UserDefaults.standard.set(0.0, forKey: "userLatitudeDelta")
+            UserDefaults.standard.set(0.0, forKey: "userLongitudeDelta")
             UserDefaults.standard.synchronize()
         }
     }

@@ -6,24 +6,39 @@
 //
 
 import UIKit
+import MapKit
 
-class PhotoAlbumViewController: UIViewController {
+class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate {
 
+    @IBOutlet weak var mapView: MKMapView!
+    var centerAnnotation = MKPointAnnotation()
+    var manager:CLLocationManager!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
-        let navBar = UINavigationBar(frame: CGRect(x: 0, y: 0, width: view.frame.size.width, height: 100))
-        view.addSubview(navBar)
+        
+        mapView.delegate = self
 
-        let navItem = UINavigationItem(title: "SomeTitle")
-        let doneItem = UIBarButtonItem(barButtonSystemItem: .done, target: nil, action: #selector(done))
-        navItem.rightBarButtonItem = doneItem
+        manager = CLLocationManager() //instantiate
+        manager.delegate = self // set the delegate
+        
+        var lat = 24.731807006668262 // get lat
+        var long = 54.822695406647966 // get long
+        var coordinate = CLLocationCoordinate2DMake(lat, long)// set coordinate
+        
+        var latDelta:CLLocationDegrees = 0.01 // set delta
+        var longDelta:CLLocationDegrees = 0.01 // set long
+        var span:MKCoordinateSpan = MKCoordinateSpan(latitudeDelta: latDelta, longitudeDelta: longDelta)
+        var region:MKCoordinateRegion = MKCoordinateRegion(center: coordinate, span: span)
+        
+        self.mapView.setRegion(region, animated: true)
+        centerAnnotation.coordinate = mapView.centerCoordinate
+        self.mapView.addAnnotation(centerAnnotation)
 
-        navBar.setItems([navItem], animated: false)
     }
     
-    @objc func done() {
-
+    func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+        centerAnnotation.coordinate = mapView.centerCoordinate;
     }
 
 

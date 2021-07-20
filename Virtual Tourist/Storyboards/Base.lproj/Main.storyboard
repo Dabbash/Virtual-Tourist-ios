@@ -6,6 +6,7 @@
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="collection view cell content view" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -83,15 +84,53 @@
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="7Fm-6W-7qx"/>
                                 </items>
                             </toolbar>
+                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="c1V-ea-Rkc">
+                                <rect key="frame" x="0.0" y="88" width="414" height="196"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="196" id="A4Q-1t-uH5"/>
+                                </constraints>
+                                <connections>
+                                    <outlet property="delegate" destination="WEI-qN-29z" id="mCZ-Pj-Fq0"/>
+                                </connections>
+                            </mapView>
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="FCR-hA-uze">
+                                <rect key="frame" x="0.0" y="292" width="414" height="560"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="fwp-J9-kd0">
+                                    <size key="itemSize" width="128" height="128"/>
+                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                </collectionViewFlowLayout>
+                                <cells>
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="aGI-mg-Ugb">
+                                        <rect key="frame" x="0.0" y="0.0" width="128" height="128"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="sqi-hw-k4k">
+                                            <rect key="frame" x="0.0" y="0.0" width="128" height="128"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                        </collectionViewCellContentView>
+                                    </collectionViewCell>
+                                </cells>
+                            </collectionView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="4vf-2x-nMa"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="c1V-ea-Rkc" firstAttribute="top" secondItem="4vf-2x-nMa" secondAttribute="top" id="3Nz-br-Dfn"/>
+                            <constraint firstItem="c1V-ea-Rkc" firstAttribute="trailing" secondItem="4vf-2x-nMa" secondAttribute="trailing" id="GRd-dy-xso"/>
+                            <constraint firstItem="c1V-ea-Rkc" firstAttribute="leading" secondItem="4vf-2x-nMa" secondAttribute="leading" id="QYB-Qv-FSD"/>
+                        </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="NTn-s5-eNX"/>
+                    <connections>
+                        <outlet property="mapView" destination="c1V-ea-Rkc" id="eo6-D0-PfE"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="3nB-ze-sNN" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="707" y="90"/>
+            <point key="canvasLocation" x="704.34782608695662" y="89.732142857142847"/>
         </scene>
     </scenes>
     <resources>

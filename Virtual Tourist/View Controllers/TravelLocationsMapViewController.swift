@@ -8,8 +8,9 @@
 import UIKit
 import MapKit
 import CoreLocation
+import CoreData
 
-class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
+class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSFetchedResultsControllerDelegate {
 
     @IBOutlet weak var mapView: MKMapView!
     
@@ -19,27 +20,46 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
     var latitudeZoom: Double?
     var logitudeZoom: Double?
     
+    var dataController:DataController!
+    
+    var fetchedResultsController:NSFetchedResultsController<Pin>!
+    
+    fileprivate func setUpFetchedResultController() {
+        let fetchRequest:NSFetchRequest<Pin> = Pin.fetchRequest()
+        //***** need to a ask about sorting even if there is no table and only pin without creatinn date
+        let sortDescriptor = NSSortDescriptor(key: "latitude", ascending: false)
+        fetchRequest.sortDescriptors = [sortDescriptor]
+        
+        fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: dataController.viewContext, sectionNameKeyPath: nil, cacheName: nil)
+        fetchedResultsController.delegate = self
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            fatalError("The fetch could not be performed: \(error.localizedDescription)")
+        }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
         mapView.delegate = self
 
-        let lat = UserDefaults.standard.double(forKey: "userLatitude")
-        let long = UserDefaults.standard.double(forKey: "userLogitude")
-        let latZoom = UserDefaults.standard.double(forKey: "userLatitudeDelta")
-        let longZoom = UserDefaults.standard.double(forKey: "userLongitudeDelta")
-        let location = CLLocationCoordinate2D(latitude: lat, longitude: long)
+        fetchUserDefaultsDetailsForMap()
+        
+        setUpFetchedResultController()
+        
+        let uilpgr = UILongPressGestureRecognizer(target: self, action: #selector(createNewAnnotation))
+        uilpgr.minimumPressDuration = 0.25
+        mapView.addGestureRecognizer(uilpgr)
         
         
-        print(latZoom)
-        print(longZoom)
-    
-        mapView.setRegion(MKCoordinateRegion(center: location, latitudinalMeters: latZoom, longitudinalMeters: longZoom), animated: true)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: animated)
+        
+        
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -47,6 +67,28 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
         navigationController?.setNavigationBarHidden(false, animated: animated)
     }
     
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        
+        //we need to tear down the fetchedResultsController when this view disappears
+        fetchedResultsController = nil
+    }
+    
+    fileprivate func fetchUserDefaultsDetailsForMap() {
+        let lat = UserDefaults.standard.double(forKey: "userLatitude")
+        let long = UserDefaults.standard.double(forKey: "userLogitude")
+        let latZoom = UserDefaults.standard.double(forKey: "userLatitudeDelta")
+        let longZoom = UserDefaults.standard.double(forKey: "userLongitudeDelta")
+        let location = CLLocationCoordinate2D(latitude: lat, longitude: long)
+        
+        latitudeZoom = latZoom
+        logitudeZoom = longZoom
+        
+        print("from viewDidLoad: latitude Zoom: \(latZoom)")
+        print("from viewDidLoad: longitude Zoom:\(longZoom)")
+        
+        mapView.setRegion(MKCoordinateRegion(center: location, span: MKCoordinateSpan(latitudeDelta: latitudeZoom!, longitudeDelta: logitudeZoom!)), animated: false)
+    }
     
     // MARK: - MKMapViewDelegate
     
@@ -67,9 +109,9 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
         UserDefaults.standard.set(logitudeZoom, forKey: "userLongitudeDelta")
         
         //normal print
-        print(latitudeZoom)
-        print(logitudeZoom)
-        print("current coordinate \(latitude), \(logitude)")
+        //print(latitudeZoom)
+        //print(logitudeZoom)
+        //print("current coordinate \(latitude), \(logitude)")
                 
     }
     
@@ -94,27 +136,36 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
         
         return pinView
     }
+   
+    //Create new anotation
+    @objc func createNewAnnotation(_ sender: UIGestureRecognizer) {
+        
+        let touchPoint = sender.location(in: self.mapView)
+        let coordinates = mapView.convert(touchPoint, toCoordinateFrom: self.mapView)
+        let heldPoint = MKPointAnnotation()
+        heldPoint.coordinate = coordinates
 
-    
-    // This delegate method is implemented to respond to taps. It opens the system browser
-    // to the URL specified in the annotationViews subtitle property.
-    func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
-        if control == view.rightCalloutAccessoryView {
-            let app = UIApplication.shared
-            if let toOpen = view.annotation?.subtitle! {
-                app.openURL(URL(string: toOpen)!)
-            }
+        if (sender.state == .began) {
+            heldPoint.title = "Set Point"
+            heldPoint.subtitle = String(format: "%.4f", coordinates.latitude) + "," + String(format: "%.4f", coordinates.longitude)
+            mapView.addAnnotation(heldPoint)
         }
+        
+        //save pin to data model
+        let pin = Pin(context: dataController.viewContext)
+        pin.latitude = coordinates.latitude
+        pin.longitude = coordinates.longitude
+        try? dataController.viewContext.save()
+
+        // Cancel the long press to make way for the next gesture
+        sender.state = .cancelled
     }
     
-    func mapView(mapView: MKMapView, annotationView: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
-
-        if control == annotationView.rightCalloutAccessoryView {
-            let app = UIApplication.shared
-            app.openURL(NSURL(string: annotationView.annotation?.subtitle! ?? "") as! URL)
-        }
+    //when anotation is selected
+    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        print(view.annotation?.coordinate)
     }
-
+    
     /*
     // MARK: - Navigation
 
