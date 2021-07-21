@@ -20,7 +20,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
     var latitudeZoom: Double?
     var logitudeZoom: Double?
     
-    var dataController:DataController!
+    var dataController:DataController = DataController(modelName: "Virtual_Tourist")
     
     var fetchedResultsController:NSFetchedResultsController<Pin>!
     
