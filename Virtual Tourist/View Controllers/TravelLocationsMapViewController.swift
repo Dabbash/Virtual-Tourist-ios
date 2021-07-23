@@ -10,7 +10,7 @@ import MapKit
 import CoreLocation
 import CoreData
 
-class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSFetchedResultsControllerDelegate {
+class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
 
     @IBOutlet weak var mapView: MKMapView!
     
@@ -20,24 +20,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
     var latitudeZoom: Double?
     var logitudeZoom: Double?
     
-    var dataController:DataController = DataController(modelName: "Virtual_Tourist")
-    
-    var fetchedResultsController:NSFetchedResultsController<Pin>!
-    
-    fileprivate func setUpFetchedResultController() {
-        let fetchRequest:NSFetchRequest<Pin> = Pin.fetchRequest()
-        //***** need to a ask about sorting even if there is no table and only pin without creatinn date
-        let sortDescriptor = NSSortDescriptor(key: "latitude", ascending: false)
-        fetchRequest.sortDescriptors = [sortDescriptor]
-        
-        fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: dataController.viewContext, sectionNameKeyPath: nil, cacheName: nil)
-        fetchedResultsController.delegate = self
-        do {
-            try fetchedResultsController.performFetch()
-        } catch {
-            fatalError("The fetch could not be performed: \(error.localizedDescription)")
-        }
-    }
+    var pins:[NSManagedObject] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -46,21 +29,21 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
 
         fetchUserDefaultsDetailsForMap()
         
-        // ??????? after adding this method and some lines in createNewAnnotation method to save the pins
-        setUpFetchedResultController()
-        
         let uilpgr = UILongPressGestureRecognizer(target: self, action: #selector(createNewAnnotation))
         uilpgr.minimumPressDuration = 0.25
         mapView.addGestureRecognizer(uilpgr)
         
         
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        
+        print("--------------viewWillAppear----------------")
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: animated)
         
-        
+        viewAllPins()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -70,10 +53,8 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        
-        //we need to tear down the fetchedResultsController when this view disappears
-        fetchedResultsController = nil
     }
+    
     
     fileprivate func fetchUserDefaultsDetailsForMap() {
         let lat = UserDefaults.standard.double(forKey: "userLatitude")
@@ -85,8 +66,8 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         latitudeZoom = latZoom
         logitudeZoom = longZoom
         
-        print("from viewDidLoad: latitude Zoom: \(latZoom)")
-        print("from viewDidLoad: longitude Zoom:\(longZoom)")
+        //print("from viewDidLoad: latitude Zoom: \(latZoom)")
+        //print("from viewDidLoad: longitude Zoom:\(longZoom)")
         
         mapView.setRegion(MKCoordinateRegion(center: location, span: MKCoordinateSpan(latitudeDelta: latitudeZoom!, longitudeDelta: logitudeZoom!)), animated: false)
     }
@@ -128,14 +109,21 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
         if pinView == nil {
             pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
             pinView!.canShowCallout = true
-            pinView!.pinColor = .red
-            pinView!.rightCalloutAccessoryView = UIButton(type: .detailDisclosure)
+            pinView!.pinTintColor = .red
+            pinView!.rightCalloutAccessoryView = UIButton(type: .infoDark)
         }
         else {
             pinView!.annotation = annotation
         }
         
         return pinView
+    }
+    
+    func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
+        let ac = UIAlertController(title: "sdfghn", message: "wertgfhj", preferredStyle: .alert)
+        ac.addAction(UIAlertAction(title: "Delete", style: .default, handler: nil))
+        ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        present(ac, animated: true)
     }
    
     //Create new anotation
@@ -152,19 +140,25 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
             mapView.addAnnotation(heldPoint)
         }
         
-        //save pin to data model
-        let pin = Pin(context: dataController.viewContext)
-        pin.latitude = coordinates.latitude
-        pin.longitude = coordinates.longitude
-        try? dataController.viewContext.save()
-
+        //try another solution
+        save(latitude: coordinates.latitude, longitude: coordinates.longitude)
+        
         // Cancel the long press to make way for the next gesture
         sender.state = .cancelled
     }
     
+    func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView)
+        {
+            if let annotationTitle = view.annotation?.title
+            {
+                print("User tapped on annotation with title: \(annotationTitle!)")
+            }
+        }
+    
     //when anotation is selected
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         print(view.annotation?.coordinate)
+        
     }
     
     /*
@@ -177,4 +171,108 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate, NSF
     }
     */
 
+    func viewAllPins() {
+        
+        print("--------------viewAllPins---------------")
+        var annotations = [MKPointAnnotation]()
+        
+        //1
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
+            return
+        }
+          
+        let managedContext = appDelegate.persistentContainer.viewContext
+          
+        //2
+        let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Pin")
+          
+          //3
+        do {
+            pins = try managedContext.fetch(fetchRequest)
+            print("number of annotation that added: \(pins.count)")
+        } catch let error as NSError {
+            print("Could not fetch. \(error), \(error.userInfo)")
+        }
+        
+        for pin in pins {
+            // Notice that the float values are being used to create CLLocationDegree values.
+            // This is a version of the Double type.
+            let lat = CLLocationDegrees(pin.value(forKey: "latitude") as! Double)
+            let long = CLLocationDegrees(pin.value(forKey: "longitude") as! Double)
+            
+            // The lat and long are used to create a CLLocationCoordinates2D instance.
+            let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: long)
+            
+            // Here we create the annotation and set its coordiate, title properties
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = coordinate
+            annotation.title = "\(lat) -- \(long)"
+            
+            print(pin)
+            // Finally we place the annotation in an array of annotations.
+            annotations.append(annotation)
+            
+            self.mapView.addAnnotations(annotations)
+            
+        }
+        
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    func save(latitude: Double, longitude: Double) {
+      
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
+            return
+        }
+      
+      // 1
+        let managedContext = appDelegate.persistentContainer.viewContext
+      
+      // 2
+        let entity = NSEntityDescription.entity(forEntityName: "Pin", in: managedContext)!
+      
+        let pin = NSManagedObject(entity: entity, insertInto: managedContext)
+      
+      // 3
+        pin.setValue(latitude, forKeyPath: "latitude")
+        pin.setValue(longitude, forKeyPath: "longitude")
+      
+      // 4
+      do {
+        try managedContext.save()
+        pins.append(pin)
+      } catch let error as NSError {
+        print("Could not save. \(error), \(error.userInfo)")
+      }
+    }
+    
+    
+    func removeSpecificAnnotation() {
+        
+        pins.removeAll()
+        
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
+            return
+        }
+        
+        let managedContext = appDelegate.persistentContainer.viewContext
+        
+        print(pins.count)
+    
+        do {
+            try managedContext.save()
+        } catch let error as NSError {
+          print("Could not save. \(error), \(error.userInfo)")
+        }
+
+    }
+    
 }
+

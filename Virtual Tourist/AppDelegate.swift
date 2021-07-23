@@ -10,8 +10,6 @@ import CoreData
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
-    let dataController = DataController(modelName: "Virtual_Tourist")
     
     var window: UIWindow?
     
@@ -32,14 +30,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         currentCoordinateWhenLaunch()
         
-        //dataController.load()
-        
-        
         return true
     }
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         
+        //dataController.load()
         
         return true
     }
@@ -61,7 +57,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationDidEnterBackground(_ application: UIApplication) {
         // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-        saveViewContext()
     }
 
     // MARK: - Core Data stack
@@ -95,6 +90,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // MARK: - Core Data Saving support
 
+    
     func saveContext () {
         let context = persistentContainer.viewContext
         if context.hasChanges {
@@ -108,10 +104,5 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
     }
-    
-    func saveViewContext() {
-        try? dataController.viewContext.save()
-    }
-
 }
 
