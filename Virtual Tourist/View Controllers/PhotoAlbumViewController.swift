@@ -14,17 +14,21 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, CLLocationM
     var centerAnnotation = MKPointAnnotation()
     var manager:CLLocationManager!
     
+    var latitude: Double = 0.0
+    var longitude: Double = 0.0
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        FlickerClient.fetchPhotos(lat: latitude, lon: longitude)
         
         mapView.delegate = self
 
         manager = CLLocationManager() //instantiate
         manager.delegate = self // set the delegate
         
-        var lat = 24.731807006668262 // get lat
-        var long = 54.822695406647966 // get long
-        var coordinate = CLLocationCoordinate2DMake(lat, long)// set coordinate
+        print("\(latitude) ---- \(longitude)")
+        var coordinate = CLLocationCoordinate2DMake(latitude, longitude)// set coordinate
         
         var latDelta:CLLocationDegrees = 0.01 // set delta
         var longDelta:CLLocationDegrees = 0.01 // set long
@@ -39,6 +43,25 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, CLLocationM
     
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         centerAnnotation.coordinate = mapView.centerCoordinate;
+    }
+    
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+
+        let reuseId = "pin"
+
+        var pinView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseId) as? MKPinAnnotationView
+
+        if pinView == nil {
+            pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
+            pinView!.canShowCallout = true
+            pinView!.pinTintColor = .red
+            pinView!.rightCalloutAccessoryView = UIButton(type: .infoDark)
+        }
+        else {
+            pinView!.annotation = annotation
+        }
+
+        return pinView
     }
 
 

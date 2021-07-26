@@ -7,7 +7,7 @@
 
 import Foundation
 import CoreData
-
+/*
 class DataController {
     
     let persistentContainer: NSPersistentContainer
@@ -49,4 +49,5 @@ extension DataController {
         }
     }
 }
+*/
 */

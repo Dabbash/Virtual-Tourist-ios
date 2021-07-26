@@ -12,7 +12,7 @@
         <relationship name="photos" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Photo" inverseName="pin" inverseEntity="Photo"/>
     </entity>
     <elements>
-        <element name="Pin" positionX="-87.95635986328125" positionY="-31.12765502929688" width="120.9388427734375" height="88"/>
         <element name="Photo" positionX="115.7997436523438" positionY="-15.93060302734375" width="128" height="103"/>
+        <element name="Pin" positionX="-87.95635986328125" positionY="-31.12765502929688" width="120.9388427734375" height="88"/>
     </elements>
 </model>

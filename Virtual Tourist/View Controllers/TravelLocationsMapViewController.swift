@@ -22,18 +22,23 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
     
     var pins:[NSManagedObject] = []
     
+    var appDelegate: AppDelegate!
+    var sharedContext: NSManagedObjectContext!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
         mapView.delegate = self
 
+        appDelegate = UIApplication.shared.delegate as! AppDelegate
+                
+        sharedContext = appDelegate.persistentContainer.viewContext
+        
         fetchUserDefaultsDetailsForMap()
         
         let uilpgr = UILongPressGestureRecognizer(target: self, action: #selector(createNewAnnotation))
         uilpgr.minimumPressDuration = 0.25
         mapView.addGestureRecognizer(uilpgr)
-        
-        
         
     }
     
@@ -66,11 +71,9 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
         latitudeZoom = latZoom
         logitudeZoom = longZoom
         
-        //print("from viewDidLoad: latitude Zoom: \(latZoom)")
-        //print("from viewDidLoad: longitude Zoom:\(longZoom)")
-        
         mapView.setRegion(MKCoordinateRegion(center: location, span: MKCoordinateSpan(latitudeDelta: latitudeZoom!, longitudeDelta: logitudeZoom!)), animated: false)
     }
+    
     
     // MARK: - MKMapViewDelegate
     
@@ -89,21 +92,15 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
         UserDefaults.standard.set(logitude, forKey: "userLogitude")
         UserDefaults.standard.set(latitudeZoom, forKey: "userLatitudeDelta")
         UserDefaults.standard.set(logitudeZoom, forKey: "userLongitudeDelta")
-        
-        //normal print
-        //print(latitudeZoom)
-        //print(logitudeZoom)
-        //print("current coordinate \(latitude), \(logitude)")
-                
     }
     
     // Here we create a view with a "right callout accessory view". You might choose to look into other
     // decoration alternatives. Notice the similarity between this method and the cellForRowAtIndexPath
     // method in TableViewDataSource.
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-        
+
         let reuseId = "pin"
-        
+
         var pinView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseId) as? MKPinAnnotationView
 
         if pinView == nil {
@@ -115,16 +112,16 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
         else {
             pinView!.annotation = annotation
         }
-        
+
         return pinView
     }
     
-    func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
-        let ac = UIAlertController(title: "sdfghn", message: "wertgfhj", preferredStyle: .alert)
-        ac.addAction(UIAlertAction(title: "Delete", style: .default, handler: nil))
-        ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-        present(ac, animated: true)
-    }
+//    func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
+//        let ac = UIAlertController(title: "sdfghn", message: "wertgfhj", preferredStyle: .alert)
+//        ac.addAction(UIAlertAction(title: "Delete", style: .default, handler: nil))
+//        ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+//        present(ac, animated: true)
+//    }
    
     //Create new anotation
     @objc func createNewAnnotation(_ sender: UIGestureRecognizer) {
@@ -135,60 +132,46 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
         heldPoint.coordinate = coordinates
 
         if (sender.state == .began) {
+            
             heldPoint.title = "Set Point"
             heldPoint.subtitle = String(format: "%.4f", coordinates.latitude) + "," + String(format: "%.4f", coordinates.longitude)
             mapView.addAnnotation(heldPoint)
+            
+            //save the pin to core data
+            save(latitude: coordinates.latitude, longitude: coordinates.longitude)
         }
-        
-        //try another solution
-        save(latitude: coordinates.latitude, longitude: coordinates.longitude)
         
         // Cancel the long press to make way for the next gesture
         sender.state = .cancelled
     }
     
-    func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView)
-        {
-            if let annotationTitle = view.annotation?.title
-            {
-                print("User tapped on annotation with title: \(annotationTitle!)")
-            }
-        }
-    
     //when anotation is selected
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-        print(view.annotation?.coordinate)
         
+        latitude = (view.annotation?.coordinate.latitude)!
+        logitude = (view.annotation?.coordinate.longitude)!
+        
+        performSegue(withIdentifier: "showPhotoAlbumView", sender: nil)
+    }
+
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        let photoAlbumVC = segue.destination as! PhotoAlbumViewController
+        
+        photoAlbumVC.latitude = latitude!
+        photoAlbumVC.longitude = logitude!
     }
     
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
     func viewAllPins() {
         
         print("--------------viewAllPins---------------")
         var annotations = [MKPointAnnotation]()
         
-        //1
-        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
-            return
-        }
-          
-        let managedContext = appDelegate.persistentContainer.viewContext
-          
         //2
         let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Pin")
           
           //3
         do {
-            pins = try managedContext.fetch(fetchRequest)
+            pins = try sharedContext.fetch(fetchRequest)
             print("number of annotation that added: \(pins.count)")
         } catch let error as NSError {
             print("Could not fetch. \(error), \(error.userInfo)")
@@ -207,8 +190,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
             let annotation = MKPointAnnotation()
             annotation.coordinate = coordinate
             annotation.title = "\(lat) -- \(long)"
-            
-            print(pin)
+
             // Finally we place the annotation in an array of annotations.
             annotations.append(annotation)
             
@@ -218,60 +200,20 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
         
     }
     
-    
-    
-    
-    
-    
-    
-    
-    
     func save(latitude: Double, longitude: Double) {
       
-        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
-            return
-        }
+        let entity = NSEntityDescription.entity(forEntityName: "Pin", in: sharedContext)!
       
-      // 1
-        let managedContext = appDelegate.persistentContainer.viewContext
+        let pin = NSManagedObject(entity: entity, insertInto: sharedContext)
       
-      // 2
-        let entity = NSEntityDescription.entity(forEntityName: "Pin", in: managedContext)!
-      
-        let pin = NSManagedObject(entity: entity, insertInto: managedContext)
-      
-      // 3
         pin.setValue(latitude, forKeyPath: "latitude")
         pin.setValue(longitude, forKeyPath: "longitude")
       
-      // 4
       do {
-        try managedContext.save()
-        pins.append(pin)
+        try sharedContext.save()
       } catch let error as NSError {
         print("Could not save. \(error), \(error.userInfo)")
       }
-    }
-    
-    
-    func removeSpecificAnnotation() {
-        
-        pins.removeAll()
-        
-        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
-            return
-        }
-        
-        let managedContext = appDelegate.persistentContainer.viewContext
-        
-        print(pins.count)
-    
-        do {
-            try managedContext.save()
-        } catch let error as NSError {
-          print("Could not save. \(error), \(error.userInfo)")
-        }
-
     }
     
 }

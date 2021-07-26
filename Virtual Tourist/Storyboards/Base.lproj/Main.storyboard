@@ -3,7 +3,6 @@
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
-        <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="collection view cell content view" minToolsVersion="11.0"/>
@@ -21,30 +20,20 @@
                             <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="7Qg-xZ-G1i">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                             </mapView>
-                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="HnI-Bm-FGk">
-                                <rect key="frame" x="131" y="757" width="153" height="61"/>
-                                <color key="backgroundColor" name="AccentColor"/>
-                                <state key="normal" title="Button"/>
-                                <connections>
-                                    <segue destination="WEI-qN-29z" kind="show" id="DZR-Ng-SIP"/>
-                                </connections>
-                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="HnI-Bm-FGk" secondAttribute="trailing" constant="130" id="6Yk-pi-0RZ"/>
                             <constraint firstItem="7Qg-xZ-G1i" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="NLl-tz-PvR"/>
                             <constraint firstItem="7Qg-xZ-G1i" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="WgE-Px-OPp"/>
                             <constraint firstAttribute="bottom" secondItem="7Qg-xZ-G1i" secondAttribute="bottom" id="ayF-vB-yD3"/>
                             <constraint firstItem="7Qg-xZ-G1i" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="eAX-PJ-l3r"/>
-                            <constraint firstItem="HnI-Bm-FGk" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="131" id="g5N-Oz-RH1"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="HnI-Bm-FGk" secondAttribute="bottom" constant="75" id="xho-sW-xsd"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="naz-jv-d8c"/>
                     <connections>
                         <outlet property="mapView" destination="7Qg-xZ-G1i" id="Zem-Dx-GWK"/>
+                        <segue destination="WEI-qN-29z" kind="show" identifier="showPhotoAlbumView" id="OyF-lz-DW5"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -134,9 +123,6 @@
         </scene>
     </scenes>
     <resources>
-        <namedColor name="AccentColor">
-            <color red="0.0" green="0.46000000000000002" blue="0.89000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
