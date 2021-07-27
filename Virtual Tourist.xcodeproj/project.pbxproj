@@ -13,6 +13,7 @@
 		89BBED6726ADC83300AF0E80 /* FlickerClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89BBED6626ADC83300AF0E80 /* FlickerClient.swift */; };
 		89BBED6B26ADC84D00AF0E80 /* FlickerResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89BBED6A26ADC84D00AF0E80 /* FlickerResponse.swift */; };
 		89BBED6D26ADD3F900AF0E80 /* Photos.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89BBED6C26ADD3F900AF0E80 /* Photos.swift */; };
+		89BBED6F26AF13A200AF0E80 /* CollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89BBED6E26AF13A200AF0E80 /* CollectionViewCell.swift */; };
 		89D5DD0026A350A3004828BB /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89D5DCFF26A350A3004828BB /* AppDelegate.swift */; };
 		89D5DD0226A350A3004828BB /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89D5DD0126A350A3004828BB /* SceneDelegate.swift */; };
 		89D5DD0426A350A3004828BB /* PhotoAlbumViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89D5DD0326A350A3004828BB /* PhotoAlbumViewController.swift */; };
@@ -29,6 +30,7 @@
 		89BBED6626ADC83300AF0E80 /* FlickerClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlickerClient.swift; sourceTree = "<group>"; };
 		89BBED6A26ADC84D00AF0E80 /* FlickerResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlickerResponse.swift; sourceTree = "<group>"; };
 		89BBED6C26ADD3F900AF0E80 /* Photos.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photos.swift; sourceTree = "<group>"; };
+		89BBED6E26AF13A200AF0E80 /* CollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionViewCell.swift; sourceTree = "<group>"; };
 		89D5DCFC26A350A3004828BB /* Virtual Tourist.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Virtual Tourist.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		89D5DCFF26A350A3004828BB /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		89D5DD0126A350A3004828BB /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -130,6 +132,7 @@
 		89D5DD1826A35112004828BB /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				89BBED6E26AF13A200AF0E80 /* CollectionViewCell.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -232,6 +235,7 @@
 				89BBED6726ADC83300AF0E80 /* FlickerClient.swift in Sources */,
 				89BBED6526ADC82000AF0E80 /* FlickerModel.swift in Sources */,
 				89D5DD0226A350A3004828BB /* SceneDelegate.swift in Sources */,
+				89BBED6F26AF13A200AF0E80 /* CollectionViewCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

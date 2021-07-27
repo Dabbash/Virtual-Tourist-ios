@@ -20,7 +20,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
     var latitudeZoom: Double?
     var logitudeZoom: Double?
     
-    var pins:[NSManagedObject] = []
+    var pins:[Pin] = []
     
     var appDelegate: AppDelegate!
     var sharedContext: NSManagedObjectContext!
@@ -28,10 +28,12 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
+        
         mapView.delegate = self
 
-        appDelegate = UIApplication.shared.delegate as! AppDelegate
-                
+        appDelegate = (UIApplication.shared.delegate as! AppDelegate)
+        
         sharedContext = appDelegate.persistentContainer.viewContext
         
         fetchUserDefaultsDetailsForMap()
@@ -153,12 +155,25 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
         
         performSegue(withIdentifier: "showPhotoAlbumView", sender: nil)
     }
-
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        
         let photoAlbumVC = segue.destination as! PhotoAlbumViewController
+        
+        let annotation = mapView.selectedAnnotations[0]
+        // getting the index of the selected annotation to set pin value in destination VC
+        guard let indexPath = pins.firstIndex(where: { (pin) -> Bool in
+            pin.latitude == annotation.coordinate.latitude && pin.longitude == annotation.coordinate.longitude
+        }) else {
+            return
+        }
+        
+        photoAlbumVC.pin = pins[indexPath]
+        photoAlbumVC.sharedContext = sharedContext
         
         photoAlbumVC.latitude = latitude!
         photoAlbumVC.longitude = logitude!
+
     }
     
     func viewAllPins() {
@@ -167,7 +182,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
         var annotations = [MKPointAnnotation]()
         
         //2
-        let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Pin")
+        let fetchRequest = NSFetchRequest<Pin>(entityName: "Pin") //<Pin> Was <NSManagedObject>,, same aboive in pins array
           
           //3
         do {

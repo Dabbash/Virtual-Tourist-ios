@@ -22,9 +22,9 @@ class FlickerClient {
         var stringValue: String {
             switch self {
             case .locationCoordinate(let lat, let lon):
-                return Endpoint.base + "&lat=\(lat)" + "&lon=\(lon)" + "&per_page=18&format=json"
-            case .photoURL(let serverId, let id, let secret):
-                return "https://live.staticflickr.com/\(serverId)/\(id)_\(secret)_c.jpg"
+                return Endpoint.base + Endpoint.apiKeyParam + "&lat=\(lat)" + "&lon=\(lon)" + "&per_page=18&format=json&nojsoncallback=1"
+            case .photoURL(let server, let id, let secret):
+                return "https://live.staticflickr.com/\(server)/\(id)_\(secret)_c.jpg"
             }
         }
         
@@ -33,38 +33,43 @@ class FlickerClient {
         }
     }
     
-    class func fetchPhotos(lat: Double, lon: Double) {
+    class func fetchFlickerData(lat: Double, lon: Double, completionHandler: @escaping ([Photos], Error?) -> Void) {
         let url = Endpoint.locationCoordinate(lat, lon).url
-        
-//        var request = URLRequest(url: url)
-//        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-//        request.addValue("application/json", forHTTPHeaderField: "Accept")
         
         let task = URLSession.shared.dataTask(with: url) { data, response, error in
             guard let data = data else {
-                print(error)
+                DispatchQueue.main.async {
+                    completionHandler([], error)
+                }
                 return
             }
-        
             
             let json = JSONDecoder()
             do {
                 let response = try json.decode(FlickerResponse.self, from: data)
-                print(response)
+//                print(response)
+                completionHandler(response.photos.photo, nil)
             } catch {
                 print(error)
             }
-
+            
             print(data)
         }
         
         task.resume()
-        
     }
     
-    
-    
-    
+    class func requestFlickerImage(server: String, id: String, secret: String, completionHandler: @escaping (Data?, Error?) -> Void) {
+        let url = Endpoint.photoURL(server, id, secret).url
+        
+        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+            DispatchQueue.main.async {
+                completionHandler(data, error)
+            }
+        }
+        
+        task.resume()
+    }
     
     
 }
