@@ -21,35 +21,64 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, CLLocationM
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     @IBOutlet weak var toolBar: UIToolbar!
     
-    var pin: Pin!
-    
-    var appDelegate: AppDelegate!
-    var sharedContext: NSManagedObjectContext!
+    var dataController: DataController!
     
     var latitude: Double = 0.0
     var longitude: Double = 0.0
 
-    var flickrPhotos = [Photo]()
+    var pin: Pin!
+    var flickrPhotos: [Photo] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        appDelegate = (UIApplication.shared.delegate as! AppDelegate)
-
-        sharedContext = appDelegate.persistentContainer.viewContext
-        
+                
         self.setFetchActive(true)
         
-        FlickerClient.fetchFlickerData(lat: latitude, lon: longitude, completionHandler: { response, error in
+        //deleteAllRecords()
+        
+        FlickerClient.fetchFlickerData(lat: latitude, lon: longitude, completionHandler: { [self] response, error in
             FlickerModel.photos = response
+            print("-----------Response from FlickerClient.fetchFlickerData in viewDidLoad----------------")
+//            for r in response {
+//                //let entity = NSEntityDescription.entity(forEntityName: "Photo", in: self.sharedContext)!
+//
+//                //let photo = NSManagedObject(entity: entity, insertInto: self.sharedContext)
+//                let photo = Photo(context: self.sharedContext)
+//                photo.title = r.title
+//
+//                FlickerClient.requestFlickerImage(server: r.server, id: r.id, secret: r.secret, completionHandler: {data, error in
+//                    guard let data = data else {
+//                        print(data)
+//                        return
+//                    }
+//                    photo.imageUrl = "Empty"
+//                    let image = UIImage(data: data)?.pngData()
+//                    photo.image = image
+//                })
+//
+//              do {
+//                try self.sharedContext.save()
+//              } catch let error as NSError {
+//                print("Could not save. \(error), \(error.userInfo)")
+//              }
+//                print(r)
+//            }
+
             DispatchQueue.main.async {
                 self.collectionView.reloadData()
                 self.setFetchActive(false)
+                
+                print("-----------Check if there is value in Core Data----------------")
+                print("Number of photos in Core Data \(flickrPhotos.count)")
+                
                 if FlickerModel.photos.count == 0 {
                     self.labelFunc(isThereAnyContent: false)
                 }
             }
         })
+//
+        
         
         mapView.delegate = self
 
@@ -68,7 +97,24 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, CLLocationM
         self.mapView.addAnnotation(centerAnnotation)
 
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(true)
+        
+        let fetchRequest: NSFetchRequest<Photo> = Photo.fetchRequest()
+        let predicate  = NSPredicate(format: "pin == %@", pin)
+        fetchRequest.predicate = predicate
+        
+        if let result = try? dataController.viewContext.fetch(fetchRequest) {
+            flickrPhotos = result
+            print("number of photos that added: \(result)")
+        } else {
+            print("Could not fetch.")
+        }
+        
+    }
 
+    // MARK: - MapView
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         centerAnnotation.coordinate = mapView.centerCoordinate;
     }
@@ -108,6 +154,23 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, CLLocationM
             activityIndicator.stopAnimating()
         }
     }
+    
+    
+    func deleteAllRecords() {
+           //delete all data
+           let context = dataController.viewContext
+
+           let deleteFetch = NSFetchRequest<NSFetchRequestResult>(entityName: "Photo")
+           let deleteRequest = NSBatchDeleteRequest(fetchRequest: deleteFetch)
+
+           do {
+               try context.execute(deleteRequest)
+               try context.save()
+           } catch {
+               print ("There was an error")
+           }
+       }
+
 
 }
 
@@ -136,6 +199,19 @@ extension PhotoAlbumViewController: UICollectionViewDelegate, UICollectionViewDa
             guard let data = data else {
                 self.labelFunc(isThereAnyContent: false)
                 return
+            }
+            
+            let photo = Photo(context: self.dataController.viewContext)
+            photo.title = "title"
+            photo.imageUrl = "no url"
+
+            let image1 = UIImage(data: data)?.pngData()
+            photo.image = image1
+
+            do {
+                try self.dataController.viewContext.save()
+            } catch let error as NSError {
+              print("Could not save. \(error), \(error.userInfo)")
             }
             
             let image = UIImage(data: data)
@@ -170,3 +246,8 @@ extension PhotoAlbumViewController: UICollectionViewDelegateFlowLayout {
     }
     
 }
+
+
+
+
+
