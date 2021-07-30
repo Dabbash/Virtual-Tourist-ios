@@ -20,8 +20,9 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, CLLocationM
     @IBOutlet weak var noContentLabel: UILabel!
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     @IBOutlet weak var toolBar: UIToolbar!
-    
-    var dataController: DataController!
+
+    var appDelegate: AppDelegate!
+    var sharedContext: NSManagedObjectContext!
     
     var latitude: Double = 0.0
     var longitude: Double = 0.0
@@ -32,6 +33,21 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, CLLocationM
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        appDelegate = (UIApplication.shared.delegate as! AppDelegate)
+        sharedContext = appDelegate.persistentContainer.viewContext
+        
+        let fetchRequest: NSFetchRequest<Photo> = Photo.fetchRequest()
+        let predicate  = NSPredicate(format: "pin == %@", pin)
+        fetchRequest.predicate = predicate
+        
+        if let result = try? sharedContext.fetch(fetchRequest) {
+            flickrPhotos = result
+            print("number of photos that added: \(result)")
+            print("predicate predicate predicate: \(predicate)")
+            print("fetchRequest fetchRequest fetchRequest: \(fetchRequest)")
+        } else {
+            print("Could not fetch.")
+        }
                 
         self.setFetchActive(true)
         
@@ -97,23 +113,8 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, CLLocationM
         self.mapView.addAnnotation(centerAnnotation)
 
     }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(true)
-        
-        let fetchRequest: NSFetchRequest<Photo> = Photo.fetchRequest()
-        let predicate  = NSPredicate(format: "pin == %@", pin)
-        fetchRequest.predicate = predicate
-        
-        if let result = try? dataController.viewContext.fetch(fetchRequest) {
-            flickrPhotos = result
-            print("number of photos that added: \(result)")
-        } else {
-            print("Could not fetch.")
-        }
-        
-    }
 
+    
     // MARK: - MapView
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         centerAnnotation.coordinate = mapView.centerCoordinate;
@@ -158,7 +159,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, CLLocationM
     
     func deleteAllRecords() {
            //delete all data
-           let context = dataController.viewContext
+        let context = appDelegate.persistentContainer.viewContext
 
            let deleteFetch = NSFetchRequest<NSFetchRequestResult>(entityName: "Photo")
            let deleteRequest = NSBatchDeleteRequest(fetchRequest: deleteFetch)
@@ -201,7 +202,7 @@ extension PhotoAlbumViewController: UICollectionViewDelegate, UICollectionViewDa
                 return
             }
             
-            let photo = Photo(context: self.dataController.viewContext)
+            let photo = Photo(context: self.sharedContext)
             photo.title = "title"
             photo.imageUrl = "no url"
 
@@ -209,7 +210,7 @@ extension PhotoAlbumViewController: UICollectionViewDelegate, UICollectionViewDa
             photo.image = image1
 
             do {
-                try self.dataController.viewContext.save()
+                try self.sharedContext.save()
             } catch let error as NSError {
               print("Could not save. \(error), \(error.userInfo)")
             }

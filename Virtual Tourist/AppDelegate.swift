@@ -12,8 +12,7 @@ import CoreData
 class AppDelegate: UIResponder, UIApplicationDelegate {
     
     var window: UIWindow?
-    
-    let dataController = DataController(modelName: "Virtual_Tourist")
+
     
     func currentCoordinateWhenLaunch() {
         if(UserDefaults.standard.bool(forKey: "hasLaunchedBefore")) {

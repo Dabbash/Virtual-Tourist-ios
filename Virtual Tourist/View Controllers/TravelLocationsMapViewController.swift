@@ -22,11 +22,9 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
     
     var pins:[Pin] = []
     
-    //var appDelegate: AppDelegate!
-    //var sharedContext: NSManagedObjectContext!
-    
-    var dataController: DataController!
-    
+    var appDelegate: AppDelegate!
+    var sharedContext: NSManagedObjectContext!
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -34,12 +32,10 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
         
         mapView.delegate = self
 
-        //appDelegate = (UIApplication.shared.delegate as! AppDelegate)
-        //sharedContext = appDelegate.persistentContainer.viewContext
+        appDelegate = (UIApplication.shared.delegate as! AppDelegate)
+        sharedContext = appDelegate.persistentContainer.viewContext
         
         fetchUserDefaultsDetailsForMap()
-        
-        viewAllPins()
         
         let uilpgr = UILongPressGestureRecognizer(target: self, action: #selector(createNewAnnotation))
         uilpgr.minimumPressDuration = 0.25
@@ -53,7 +49,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: animated)
         
-        
+        viewAllPins()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -172,7 +168,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
         }
         
         photoAlbumVC.pin = pins[indexPath]
-        photoAlbumVC.dataController = dataController
+        photoAlbumVC.sharedContext = sharedContext
         
         photoAlbumVC.latitude = latitude!
         photoAlbumVC.longitude = logitude!
@@ -185,14 +181,15 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
         var annotations = [MKPointAnnotation]()
         
         //2
-        //let fetchRequest = NSFetchRequest<Pin>(entityName: "Pin") //<Pin> Was <NSManagedObject>,, same aboive in pins array
+        let fetchRequest = NSFetchRequest<Pin>(entityName: "Pin") //<Pin> Was <NSManagedObject>,, same aboive in pins array
           
-        let fetchRequest: NSFetchRequest<Pin> = Pin.fetchRequest()
-        
-        if let results = try? dataController.viewContext.fetch(fetchRequest) {
-            pins = results
+          //3
+        do {
+            pins = try sharedContext.fetch(fetchRequest)
+            print("number of annotation that added: \(pins.count)")
+        } catch let error as NSError {
+            print("Could not fetch. \(error), \(error.userInfo)")
         }
-
         
         for pin in pins {
             // Notice that the float values are being used to create CLLocationDegree values.
@@ -219,17 +216,15 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
     
     func save(latitude: Double, longitude: Double) {
       
-        //let entity = NSEntityDescription.entity(forEntityName: "Pin", in: dataController.viewContext)!
+        let entity = NSEntityDescription.entity(forEntityName: "Pin", in: sharedContext)!
       
-        let pin = Pin(context: dataController.viewContext)
-        
-        pin.latitude = latitude
-        pin.longitude = longitude
-        //pin.setValue(latitude, forKeyPath: "latitude")
-        //pin.setValue(longitude, forKeyPath: "longitude")
+        let pin = NSManagedObject(entity: entity, insertInto: sharedContext)
+      
+        pin.setValue(latitude, forKeyPath: "latitude")
+        pin.setValue(longitude, forKeyPath: "longitude")
       
       do {
-        try dataController.viewContext.save()
+        try sharedContext.save()
       } catch let error as NSError {
         print("Could not save. \(error), \(error.userInfo)")
       }
