@@ -103,6 +103,7 @@
                                 </cells>
                                 <connections>
                                     <outlet property="dataSource" destination="WEI-qN-29z" id="fv8-iy-9wD"/>
+                                    <outlet property="delegate" destination="WEI-qN-29z" id="mpl-Df-e7j"/>
                                 </connections>
                             </collectionView>
                             <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3VV-3O-Nys">
@@ -112,7 +113,11 @@
                                 </constraints>
                                 <items>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="uMI-Zq-SPt"/>
-                                    <barButtonItem title="New Collection" width="143.5" id="5dm-gO-rOZ"/>
+                                    <barButtonItem title="New Collection" width="143.5" id="5dm-gO-rOZ">
+                                        <connections>
+                                            <action selector="newCollectionButtonAction:" destination="WEI-qN-29z" id="z3E-Iz-FEh"/>
+                                        </connections>
+                                    </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="7Fm-6W-7qx"/>
                                 </items>
                             </toolbar>

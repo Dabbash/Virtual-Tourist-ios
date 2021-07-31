@@ -140,6 +140,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
             
             //save the pin to core data
             save(latitude: coordinates.latitude, longitude: coordinates.longitude)
+        
         }
         
         // Cancel the long press to make way for the next gesture
@@ -156,6 +157,16 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        
+        let fetchRequest = NSFetchRequest<Pin>(entityName: "Pin") 
+          
+          //3
+        do {
+            pins = try sharedContext.fetch(fetchRequest)
+            print("number of annotation that added: \(pins.count)")
+        } catch let error as NSError {
+            print("Could not fetch. \(error), \(error.userInfo)")
+        }
         
         let photoAlbumVC = segue.destination as! PhotoAlbumViewController
         
@@ -208,8 +219,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
             // Finally we place the annotation in an array of annotations.
             annotations.append(annotation)
             
-            self.mapView.addAnnotations(annotations)
-            
+            self.mapView.addAnnotations(annotations)            
         }
         
     }

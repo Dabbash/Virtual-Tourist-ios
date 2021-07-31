@@ -12,4 +12,5 @@ class CollectionViewCell: UICollectionViewCell {
     
     @IBOutlet var flickerImage: UIImageView!
 
+    
 }

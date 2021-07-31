@@ -30,71 +30,35 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, CLLocationM
     var pin: Pin!
     var flickrPhotos: [Photo] = []
     
+    var selectedIndex:IndexPath?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+                
         
-        appDelegate = (UIApplication.shared.delegate as! AppDelegate)
-        sharedContext = appDelegate.persistentContainer.viewContext
+        
+        //deleteAllRecords()
+
         
         let fetchRequest: NSFetchRequest<Photo> = Photo.fetchRequest()
         let predicate  = NSPredicate(format: "pin == %@", pin)
         fetchRequest.predicate = predicate
-        
+
         if let result = try? sharedContext.fetch(fetchRequest) {
             flickrPhotos = result
-            print("number of photos that added: \(result)")
-            print("predicate predicate predicate: \(predicate)")
-            print("fetchRequest fetchRequest fetchRequest: \(fetchRequest)")
+    
+            if flickrPhotos.count == 0 {
+                setFetchActive(true)
+                fetchDataFromFlicker()
+            } else {
+                labelFunc(isThereAnyContent: true)
+            }
+            
         } else {
             print("Could not fetch.")
         }
-                
-        self.setFetchActive(true)
         
-        //deleteAllRecords()
-        
-        FlickerClient.fetchFlickerData(lat: latitude, lon: longitude, completionHandler: { [self] response, error in
-            FlickerModel.photos = response
-            print("-----------Response from FlickerClient.fetchFlickerData in viewDidLoad----------------")
-//            for r in response {
-//                //let entity = NSEntityDescription.entity(forEntityName: "Photo", in: self.sharedContext)!
-//
-//                //let photo = NSManagedObject(entity: entity, insertInto: self.sharedContext)
-//                let photo = Photo(context: self.sharedContext)
-//                photo.title = r.title
-//
-//                FlickerClient.requestFlickerImage(server: r.server, id: r.id, secret: r.secret, completionHandler: {data, error in
-//                    guard let data = data else {
-//                        print(data)
-//                        return
-//                    }
-//                    photo.imageUrl = "Empty"
-//                    let image = UIImage(data: data)?.pngData()
-//                    photo.image = image
-//                })
-//
-//              do {
-//                try self.sharedContext.save()
-//              } catch let error as NSError {
-//                print("Could not save. \(error), \(error.userInfo)")
-//              }
-//                print(r)
-//            }
-
-            DispatchQueue.main.async {
-                self.collectionView.reloadData()
-                self.setFetchActive(false)
-                
-                print("-----------Check if there is value in Core Data----------------")
-                print("Number of photos in Core Data \(flickrPhotos.count)")
-                
-                if FlickerModel.photos.count == 0 {
-                    self.labelFunc(isThereAnyContent: false)
-                }
-            }
-        })
-//
-        
+       
         
         mapView.delegate = self
 
@@ -114,6 +78,12 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, CLLocationM
 
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(true)
+        
+        appDelegate = (UIApplication.shared.delegate as! AppDelegate)
+        sharedContext = appDelegate.persistentContainer.viewContext
+    }
     
     // MARK: - MapView
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
@@ -138,13 +108,89 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, CLLocationM
 
         return pinView
     }
-    
+
+    func fetchDataFromFlicker() {
+        FlickerClient.fetchFlickerData(lat: latitude, lon: longitude, completionHandler: { [self] response, error in
+            FlickerModel.photos = response
+            
+            for flickr in FlickerModel.photos {
+                FlickerClient.requestFlickerImage(server: flickr.server, id: flickr.id, secret: flickr.secret, completionHandler: {data, error in
+                    guard let data = data else {
+                        return
+                    }
+
+                    let photo = Photo(context: self.sharedContext)
+                    photo.title = flickr.id
+                    photo.imageUrl = FlickerClient.Endpoint.photoURL(flickr.server, flickr.id, flickr.secret).stringValue
+
+                    let image1 = UIImage(data: data)?.pngData()
+                    photo.image = image1
+                    photo.pin = self.pin
+                    do {
+                        try self.sharedContext.save()
+                    } catch let error as NSError {
+                      print("Could not save. \(error), \(error.userInfo)")
+                    }
+                    
+                    DispatchQueue.main.async {
+                        let fetchRequest: NSFetchRequest<Photo> = Photo.fetchRequest()
+                        let predicate  = NSPredicate(format: "pin == %@", pin)
+                        fetchRequest.predicate = predicate
+
+                        if let result = try? sharedContext.fetch(fetchRequest) {
+                            flickrPhotos = result
+
+                            self.collectionView.reloadData()
+                            
+                        } else {
+                            print("Could not fetch.")
+                        }
+                        
+                    }
+
+                })
+                
+            }
+            
+            print("-----------Response from fetchDataFromFlicker Function----------------")
+            DispatchQueue.main.async {
+                
+                let fetchRequest: NSFetchRequest<Photo> = Photo.fetchRequest()
+                let predicate  = NSPredicate(format: "pin == %@", pin)
+                fetchRequest.predicate = predicate
+
+                if let result = try? sharedContext.fetch(fetchRequest) {
+                    flickrPhotos = result
+
+                    self.collectionView.reloadData()
+                    
+                    self.setFetchActive(false)
+
+                    print("-----------Check if there is value in Core Data----------------")
+                    print("Number of photos in Core Data \(flickrPhotos.count)")
+
+                    if FlickerModel.photos.count == 0 {
+                        self.labelFunc(isThereAnyContent: false)
+                    }
+                } else {
+                    print("Could not fetch.")
+                }
+
+            }
+        })
+
+        self.collectionView.reloadData()
+        
+
+    }
     
     func labelFunc(isThereAnyContent: Bool) {
         if isThereAnyContent {
             noContentLabel.isHidden = true
+            toolBar.isHidden = false
         } else {
             noContentLabel.isHidden = false
+            toolBar.isHidden = true
         }
     }
     
@@ -156,6 +202,26 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, CLLocationM
         }
     }
     
+//    func selectedItemToDelete(indexPath: IndexPath) {
+//
+//        let photoToDelete = flickrPhotos[indexPath.row]
+//
+//        let fetchRequest: NSFetchRequest<Photo> = Photo.fetchRequest()
+//        let predicate  = NSPredicate(format: "title == %@", photoToDelete.title!)
+//        fetchRequest.predicate = predicate
+//
+//        if let result = try? sharedContext.fetch(fetchRequest) {
+//            flickrPhotos = result
+//            for photo in flickrPhotos {
+//                sharedContext.delete(photo)
+//            }
+//            try? sharedContext.save()
+//        }
+//
+//        print("Photo left is: \(flickrPhotos.count)")
+//        collectionView.reloadData()
+//    }
+
     
     func deleteAllRecords() {
            //delete all data
@@ -172,55 +238,67 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, CLLocationM
            }
        }
 
+    @IBAction func newCollectionButtonAction(_ sender: Any) {
+        
+        let fetchRequest: NSFetchRequest<Photo> = Photo.fetchRequest()
+        let predicate  = NSPredicate(format: "pin == %@", pin)
+        fetchRequest.predicate = predicate
 
+        if let result = try? sharedContext.fetch(fetchRequest) {
+            for photo in result {
+                sharedContext.delete(photo)
+                try? self.sharedContext.save()
+            }
+            
+            collectionView.reloadData()
+            
+            setFetchActive(true)
+            fetchDataFromFlicker()
+  
+        } else {
+            print("Could not fetch.")
+        }
+        
+    }
+    
 }
 
 
 // MARK: - UICollectionViewDataSource
 extension PhotoAlbumViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     
-    // 1
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
   
-    // 2
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        print("Number of photos: \(FlickerModel.photos.count)")
-        return FlickerModel.photos.count
+        return flickrPhotos.count
     }
-  
-    // 3
+
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "collectionCellView", for: indexPath) as! CollectionViewCell
         
-        let flickr = FlickerModel.photos[indexPath.row]
+        //let flickr = FlickerModel.photos[indexPath.row]
+        let flickr = flickrPhotos[indexPath.row]
         
-        FlickerClient.requestFlickerImage(server: flickr.server, id: flickr.id, secret: flickr.secret, completionHandler: {data, error in
-            guard let data = data else {
-                self.labelFunc(isThereAnyContent: false)
-                return
-            }
-            
-            let photo = Photo(context: self.sharedContext)
-            photo.title = "title"
-            photo.imageUrl = "no url"
+        if let image = flickr.image {
+            cell.flickerImage.image = UIImage(data: image)
+        }
 
-            let image1 = UIImage(data: data)?.pngData()
-            photo.image = image1
-
-            do {
-                try self.sharedContext.save()
-            } catch let error as NSError {
-              print("Could not save. \(error), \(error.userInfo)")
-            }
-            
-            let image = UIImage(data: data)
-            cell.flickerImage.image = image
-        })
-
+        
         return cell
     }
+
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
+        sharedContext.delete(flickrPhotos[indexPath.row])
+        try? self.sharedContext.save()
+        flickrPhotos.remove(at: indexPath.row)
+        
+        collectionView.reloadData()
+    }
+    
+
 }
 
 // MARK: - Collection View Flow Layout Delegate

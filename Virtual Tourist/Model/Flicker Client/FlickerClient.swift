@@ -47,13 +47,10 @@ class FlickerClient {
             let json = JSONDecoder()
             do {
                 let response = try json.decode(FlickerResponse.self, from: data)
-//                print(response)
                 completionHandler(response.photos.photo, nil)
             } catch {
                 print(error)
             }
-            
-            print(data)
         }
         
         task.resume()
