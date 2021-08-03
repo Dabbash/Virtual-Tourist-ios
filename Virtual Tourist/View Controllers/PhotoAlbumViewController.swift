@@ -169,33 +169,34 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, CLLocationM
             }
             
             print("-----------Response from fetchDataFromFlicker Function----------------")
-            DispatchQueue.main.async {
-                
-                let fetchRequest: NSFetchRequest<Photo> = Photo.fetchRequest()
-                let predicate  = NSPredicate(format: "pin == %@", pin)
-                fetchRequest.predicate = predicate
-
-                if let result = try? sharedContext.fetch(fetchRequest) {
-                    flickrPhotos = result
-
-                    self.collectionView.reloadData()
-                    
-                    self.setFetchActive(false)
-
-                    print("-----------Check if there is value in Core Data----------------")
-                    print("Number of photos in Core Data \(flickrPhotos.count)")
-
-                    if FlickerModel.photos.count == 0 {
-                        self.labelFunc(isThereAnyContent: false)
-                    }
-                } else {
-                    print("Could not fetch.")
-                }
-
-            }
+//            * This is not needed it already loads images in the code above *
+//            DispatchQueue.main.async {
+//
+//                let fetchRequest: NSFetchRequest<Photo> = Photo.fetchRequest()
+//                let predicate  = NSPredicate(format: "pin == %@", pin)
+//                fetchRequest.predicate = predicate
+//
+//                if let result = try? sharedContext.fetch(fetchRequest) {
+//                    flickrPhotos = result
+//
+//                    self.collectionView.reloadData()
+//
+//                    self.setFetchActive(false)
+//
+//                    print("-----------Check if there is value in Core Data----------------")
+//                    print("Number of photos in Core Data \(flickrPhotos.count)")
+//
+//                    if FlickerModel.photos.count == 0 {
+//                        self.labelFunc(isThereAnyContent: false)
+//                    }
+//                } else {
+//                    print("Could not fetch.")
+//                }
+//
+//            }
         })
 
-        self.collectionView.reloadData()
+//        self.collectionView.reloadData()
         
 
     }
