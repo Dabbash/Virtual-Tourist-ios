@@ -111,6 +111,12 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, CLLocationM
 
     func fetchDataFromFlicker() {
         FlickerClient.fetchFlickerData(lat: latitude, lon: longitude, completionHandler: { [self] response, error in
+            
+            if response.isEmpty {
+                self.labelFunc(isThereAnyContent: false)
+                self.setFetchActive(false)
+            }
+            
             FlickerModel.photos = response
             
 //            Create empty Photos to be replaced with placeholder images
