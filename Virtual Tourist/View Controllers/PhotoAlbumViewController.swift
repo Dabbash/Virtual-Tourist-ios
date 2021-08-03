@@ -113,6 +113,14 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, CLLocationM
         FlickerClient.fetchFlickerData(lat: latitude, lon: longitude, completionHandler: { [self] response, error in
             FlickerModel.photos = response
             
+//            Create empty Photos to be replaced with placeholder images
+            for _ in FlickerModel.photos {
+                let newPhoto = Photo(context: sharedContext)
+                flickrPhotos.append(newPhoto)
+            }
+            
+            var indexNumber = 0
+            
             for flickr in FlickerModel.photos {
                 FlickerClient.requestFlickerImage(server: flickr.server, id: flickr.id, secret: flickr.secret, completionHandler: {data, error in
                     guard let data = data else {
@@ -138,10 +146,18 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, CLLocationM
                         fetchRequest.predicate = predicate
 
                         if let result = try? sharedContext.fetch(fetchRequest) {
-                            flickrPhotos = result
+//                            Replace placeholder Image with a downloaded image
+                            flickrPhotos[indexNumber] = result[indexNumber]
+                            indexNumber += 1
+                            print(flickrPhotos.count)
 
-                            self.collectionView.reloadData()
-                            
+                            self.collectionView.reloadData() {
+//                                If this is the last photo disable loading
+                                if result.count == FlickerModel.photos.count {
+                                    setFetchActive(false)
+                                }
+                            }
+
                         } else {
                             print("Could not fetch.")
                         }
@@ -283,6 +299,9 @@ extension PhotoAlbumViewController: UICollectionViewDelegate, UICollectionViewDa
         
         if let image = flickr.image {
             cell.flickerImage.image = UIImage(data: image)
+        } else {
+//            If image is empty use placeholder image
+            cell.flickerImage.image = UIImage(named: "jk-placeholder-image")
         }
 
         
@@ -329,4 +348,11 @@ extension PhotoAlbumViewController: UICollectionViewDelegateFlowLayout {
 
 
 
-
+//MARK: - ReloadDataCompletion
+extension UICollectionView {
+//    Completion for CollectionView reloading data
+    func reloadData(completion:@escaping ()->()) {
+        UIView.animate(withDuration: 0, animations: reloadData)
+            { _ in completion() }
+    }
+}
