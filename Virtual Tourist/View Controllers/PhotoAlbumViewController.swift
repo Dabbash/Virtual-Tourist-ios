@@ -257,6 +257,8 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, CLLocationM
 
     @IBAction func newCollectionButtonAction(_ sender: Any) {
         
+        flickrPhotos = []
+        
         let fetchRequest: NSFetchRequest<Photo> = Photo.fetchRequest()
         let predicate  = NSPredicate(format: "pin == %@", pin)
         fetchRequest.predicate = predicate
